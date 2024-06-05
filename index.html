@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Three.js - Textured Cube (Yernar Smagulov, ysmagulo@ucsc.edu) </title>
+    <style>
+    html, body {
+        height: 100%;
+        margin: 0;
+    }
+    #c {
+        width: 100%;
+        height: 100%;
+        display: block;
+        background: url(./images/sky1.png) no-repeat center center;
+        background-size: cover;
+    }
+    </style>
+  </head>
+  <body>
+    <canvas id="c"></canvas>
+  </body>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://threejs.org/build/three.module.js",
+    "three/addons/": "https://threejs.org/examples/jsm/"
+  }
+}
+</script>
+
+<script type="x-shader/x-vertex" id="vertexShader">
+  varying vec3 vWorldPosition;
+  
+  void main() {
+      vec4 worldPosition = modelMatrix * vec4(position, 1.0);
+      vWorldPosition = worldPosition.xyz;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+</script>
+  
+
+<script type="x-shader/x-fragment" id="fragmentShader">
+uniform float time;
+varying vec3 vWorldPosition;
+
+void main() {
+    // Normalize vWorldPosition to use it in color calculation
+    vec3 normalizedWorldPosition = normalize(vWorldPosition);
+    float timeSin = sin(time); // This will oscillate between -1 and 1
+
+    // Interpolated colors for day and night
+    vec3 dayColor = vec3(0.4, 0.7, 1.0);  // Blue sky
+    vec3 nightColor = vec3(0.0, 0.0, 0.2);  // Dark blue night sky
+
+    // Interpolate based on the sinusoidal time value
+    vec3 color = mix(nightColor, dayColor, timeSin * 0.5 + 0.5);  // Normalize timeSin to 0.0 to 1.0
+
+    gl_FragColor = vec4(color, 1.0);
+}
+</script>
+
+<script id="sunVertexShader" type="x-shader/x-vertex">
+  varying vec3 vNormal;
+  varying vec3 vPosition;
+  void main() {
+    vNormal = normalize(normalMatrix * normal);
+    vec4 worldPosition = modelMatrix * vec4(position, 1.0);
+    vPosition = worldPosition.xyz;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+</script>
+
+<script id="sunFragmentShader" type="x-shader/x-fragment">
+  uniform vec3 sunColor;
+  varying vec3 vNormal;
+  varying vec3 vPosition;
+  void main() {
+    vec3 lightDirection = normalize(vec3(0.0, 0.0, 1.0)); // Simplified light direction for sun
+    float intensity = max(dot(vNormal, lightDirection), 0.0);
+    gl_FragColor = vec4(sunColor * intensity, 1.0);
+  }
+</script>
+
+
+
+<script id="moonVertexShader" type="x-shader/x-vertex">
+  varying vec3 vNormal;
+  varying vec3 vPosition;
+  void main() {
+    vNormal = normalize(normalMatrix * normal);
+    vec4 worldPosition = modelMatrix * vec4(position, 1.0);
+    vPosition = worldPosition.xyz;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+</script>
+
+<script id="moonFragmentShader" type="x-shader/x-fragment">
+  uniform vec3 moonColor;
+  varying vec3 vNormal;
+  varying vec3 vPosition;
+  void main() {
+    vec3 lightDirection = normalize(vec3(0.0, 0.0, 1.0)); // Simplified light direction for moon
+    float intensity = max(dot(vNormal, lightDirection), 0.0);
+    gl_FragColor = vec4(moonColor * intensity, 1.0);
+  }
+</script>
+
+
+
+
+  
+  
+
+<script type="module" src="./main.js"></script>
+</html>
+
